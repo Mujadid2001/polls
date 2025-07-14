@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile - {{ user.get_full_name|default:user.username }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5><i class="fas fa-user-circle"></i> Profile Overview</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-user-circle fa-5x text-muted"></i>
+                </div>
+                <h4>{{ user.get_full_name|default:user.username }}</h4>
+                <span class="badge bg-{{ profile.role|yesno:'primary,warning,secondary' }} mb-3">
+                    {{ profile.get_role_display }}
+                </span>
+                {% if profile.is_verified %}
+                    <div class="mb-2">
+                        <span class="badge bg-success">
+                            <i class="fas fa-check-circle"></i> Verified
+                        </span>
+                    </div>
+                {% endif %}
+                <p class="text-muted">
+                    <small>Member since {{ user.date_joined|date:"F Y" }}</small>
+                </p>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'accounts:profile_edit' %}" class="btn btn-primary">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </a>
+                    <a href="{% url 'socialaccount_connections' %}" class="btn btn-outline-info">
+                        <i class="fas fa-share-alt"></i> Social Accounts
+                    </a>
+                    <a href="{% url 'accounts:dashboard' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle"></i> Personal Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-sm-3"><strong>Username:</strong></div>
+                    <div class="col-sm-9">{{ user.username }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-3"><strong>Email:</strong></div>
+                    <div class="col-sm-9">{{ user.email|default:"Not provided" }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-3"><strong>Phone:</strong></div>
+                    <div class="col-sm-9">{{ profile.phone_number|default:"Not provided" }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-3"><strong>Date of Birth:</strong></div>
+                    <div class="col-sm-9">{{ profile.date_of_birth|default:"Not provided" }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-3"><strong>Role:</strong></div>
+                    <div class="col-sm-9">
+                        <span class="badge bg-{{ profile.role|yesno:'primary,warning,secondary' }}">
+                            {{ profile.get_role_display }}
+                        </span>
+                    </div>
+                </div>
+                {% if profile.bio %}
+                <div class="row mb-3">
+                    <div class="col-sm-3"><strong>Bio:</strong></div>
+                    <div class="col-sm-9">{{ profile.bio }}</div>
+                </div>
+                {% endif %}
+                <div class="row mb-3">
+                    <div class="col-sm-3"><strong>Last Login:</strong></div>
+                    <div class="col-sm-9">{{ user.last_login|default:"Never" }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-3"><strong>Profile Updated:</strong></div>
+                    <div class="col-sm-9">{{ profile.updated_at }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Role Permissions Card -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-shield-alt"></i> Permissions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Create Polls
+                                {% if profile.can_create_polls %}
+                                    <span class="badge bg-success rounded-pill">
+                                        <i class="fas fa-check"></i>
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-danger rounded-pill">
+                                        <i class="fas fa-times"></i>
+                                    </span>
+                                {% endif %}
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Delete Polls
+                                {% if profile.can_delete_polls %}
+                                    <span class="badge bg-success rounded-pill">
+                                        <i class="fas fa-check"></i>
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-danger rounded-pill">
+                                        <i class="fas fa-times"></i>
+                                    </span>
+                                {% endif %}
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Moderate Content
+                                {% if profile.can_moderate_content %}
+                                    <span class="badge bg-success rounded-pill">
+                                        <i class="fas fa-check"></i>
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-danger rounded-pill">
+                                        <i class="fas fa-times"></i>
+                                    </span>
+                                {% endif %}
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Admin Access
+                                {% if profile.is_admin %}
+                                    <span class="badge bg-success rounded-pill">
+                                        <i class="fas fa-check"></i>
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-danger rounded-pill">
+                                        <i class="fas fa-times"></i>
+                                    </span>
+                                {% endif %}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

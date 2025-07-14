@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - Polls App{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body text-center">
+                <h4>Redirecting to Registration...</h4>
+                <p>Please wait while we redirect you to the registration page.</p>
+                <div class="spinner-border text-success" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Redirect to allauth signup
+    window.location.href = '{% url "account_signup" %}';
+</script>
+{% endblock %}

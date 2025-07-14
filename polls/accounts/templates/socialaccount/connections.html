@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load socialaccount %}
+
+{% block title %}Social Accounts - {{ user.get_full_name|default:user.username }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-share-alt"></i> Connected Social Accounts</h2>
+            <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Profile
+            </a>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5><i class="fas fa-link"></i> Manage Your Social Connections</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if socialaccount_providers %}
+                            <p class="text-muted mb-4">
+                                You can connect your social media accounts to make logging in easier. 
+                                Connected accounts will allow you to sign in with just one click.
+                            </p>
+                            
+                            <!-- Connected Accounts -->
+                            {% get_social_accounts user as accounts %}
+                            {% if accounts %}
+                                <h6 class="mb-3"><i class="fas fa-check-circle text-success"></i> Connected Accounts</h6>
+                                <div class="list-group mb-4">
+                                    {% for account in accounts %}
+                                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div class="d-flex align-items-center">
+                                                {% if account.provider == 'google' %}
+                                                    <i class="fab fa-google fa-2x text-danger me-3"></i>
+                                                    <div>
+                                                        <h6 class="mb-0">Google</h6>
+                                                        <small class="text-muted">{{ account.extra_data.email|default:account.uid }}</small>
+                                                    </div>
+                                                {% elif account.provider == 'facebook' %}
+                                                    <i class="fab fa-facebook-f fa-2x text-primary me-3"></i>
+                                                    <div>
+                                                        <h6 class="mb-0">Facebook</h6>
+                                                        <small class="text-muted">{{ account.extra_data.name|default:account.uid }}</small>
+                                                    </div>
+                                                {% elif account.provider == 'twitter' %}
+                                                    <i class="fab fa-twitter fa-2x text-info me-3"></i>
+                                                    <div>
+                                                        <h6 class="mb-0">Twitter</h6>
+                                                        <small class="text-muted">@{{ account.extra_data.screen_name|default:account.uid }}</small>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <span class="badge bg-success me-2">Connected</span>
+                                                <form method="post" action="{% url 'socialaccount_connections' %}" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="account" value="{{ account.id }}">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                            onclick="return confirm('Are you sure you want to disconnect this account?')">
+                                                        <i class="fas fa-unlink"></i> Disconnect
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Available Providers to Connect -->
+                            <h6 class="mb-3"><i class="fas fa-plus-circle text-primary"></i> Available Connections</h6>
+                            <div class="row">
+                                {% for provider in socialaccount_providers %}
+                                    {% get_social_accounts user provider=provider.id as provider_accounts %}
+                                    {% if not provider_accounts %}
+                                        <div class="col-md-6 mb-3">
+                                            <div class="card border-2">
+                                                <div class="card-body text-center">
+                                                    {% if provider.id == 'google' %}
+                                                        <i class="fab fa-google fa-3x text-danger mb-3"></i>
+                                                        <h6>Google</h6>
+                                                        <p class="small text-muted">Connect your Google account for easy login</p>
+                                                        <a href="{% provider_login_url provider.id process='connect' %}" class="btn btn-outline-danger">
+                                                            <i class="fas fa-link"></i> Connect Google
+                                                        </a>
+                                                    {% elif provider.id == 'facebook' %}
+                                                        <i class="fab fa-facebook-f fa-3x text-primary mb-3"></i>
+                                                        <h6>Facebook</h6>
+                                                        <p class="small text-muted">Connect your Facebook account for easy login</p>
+                                                        <a href="{% provider_login_url provider.id process='connect' %}" class="btn btn-outline-primary">
+                                                            <i class="fas fa-link"></i> Connect Facebook
+                                                        </a>
+                                                    {% elif provider.id == 'twitter' %}
+                                                        <i class="fab fa-twitter fa-3x text-info mb-3"></i>
+                                                        <h6>Twitter</h6>
+                                                        <p class="small text-muted">Connect your Twitter account for easy login</p>
+                                                        <a href="{% provider_login_url provider.id process='connect' %}" class="btn btn-outline-info">
+                                                            <i class="fas fa-link"></i> Connect Twitter
+                                                        </a>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-share-alt fa-3x text-muted mb-3"></i>
+                                <h5>Social Authentication Not Available</h5>
+                                <p class="text-muted">Social media login providers are not configured for this application.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h6><i class="fas fa-info-circle"></i> Benefits of Connecting</h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Quick and easy login
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                No need to remember passwords
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Automatic profile updates
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Enhanced security
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Cross-device synchronization
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="card mt-3">
+                    <div class="card-header bg-danger text-white">
+                        <h6><i class="fas fa-shield-alt"></i> Security Notice</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="small mb-2">
+                            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                            Only connect accounts you trust and control.
+                        </p>
+                        <p class="small mb-2">
+                            <i class="fas fa-eye text-info me-2"></i>
+                            We only access basic profile information.
+                        </p>
+                        <p class="small mb-0">
+                            <i class="fas fa-times-circle text-danger me-2"></i>
+                            You can disconnect anytime.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

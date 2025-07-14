@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ question.question_text }} - Results{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h4><i class="fas fa-chart-bar"></i> Poll Results</h4>
+            </div>
+            <div class="card-body">
+                <h2 class="mb-4">{{ question.question_text }}</h2>
+                
+                <div class="mb-4">
+                    <p class="text-muted">
+                        <i class="fas fa-calendar"></i> Published: {{ question.pub_date|date:"F d, Y H:i" }}
+                        {% if question.published_recently %}
+                            <span class="badge bg-success ms-2">Recently Published</span>
+                        {% endif %}
+                    </p>
+                </div>
+
+                {% if question.choice_set.all %}
+                    {% comment %} Calculate total votes first {% endcomment %}
+                    {% with total_votes=0 %}
+                        {% for choice in question.choice_set.all %}
+                            {% with total_votes=total_votes|add:choice.votes %}
+                            {% endwith %}
+                        {% endfor %}
+                        
+                        {% for choice in question.choice_set.all %}
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h5 class="mb-0">{{ choice.choice_text }}</h5>
+                                    <span class="badge bg-primary">
+                                        {{ choice.votes }} vote{{ choice.votes|pluralize }}
+                                        {% if total_votes > 0 %}
+                                            ({% widthratio choice.votes total_votes 100 %}%)
+                                        {% else %}
+                                            (0%)
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                
+                                <div class="progress" style="height: 30px;">
+                                    {% if total_votes > 0 %}
+                                        {% widthratio choice.votes total_votes 100 as percentage %}
+                                    {% else %}
+                                        {% with percentage=0 %}
+                                        {% endwith %}
+                                    {% endif %}
+                                    <div class="progress-bar bg-primary" role="progressbar" 
+                                         style="width: {% if total_votes > 0 %}{% widthratio choice.votes total_votes 100 %}{% else %}0{% endif %}%;" 
+                                         aria-valuenow="{% if total_votes > 0 %}{% widthratio choice.votes total_votes 100 %}{% else %}0{% endif %}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                        {% if total_votes > 0 %}
+                                            {% widthratio choice.votes total_votes 100 %}%
+                                        {% else %}
+                                            0%
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        
+                        <div class="mt-4 p-3 bg-light rounded">
+                            <div class="row text-center">
+                                <div class="col-md-4">
+                                    <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                                    <h5>Total Votes</h5>
+                                    <h3 class="text-primary">{{ total_votes }}</h3>
+                                </div>
+                                <div class="col-md-4">
+                                    <i class="fas fa-list fa-2x text-success mb-2"></i>
+                                    <h5>Options</h5>
+                                    <h3 class="text-success">{{ question.choice_set.count }}</h3>
+                                </div>
+                                <div class="col-md-4">
+                                    <i class="fas fa-calendar fa-2x text-info mb-2"></i>
+                                    <h5>Published</h5>
+                                    <h3 class="text-info">{{ question.pub_date|timesince }} ago</h3>
+                                </div>
+                            </div>
+                        </div>
+                    {% endwith %}
+                {% else %}
+                    <div class="alert alert-warning text-center">
+                        <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                        <h5>No voting options available for this poll.</h5>
+                    </div>
+                {% endif %}
+                
+                <div class="d-flex gap-2 mt-4">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'home_polls:detail' question.id %}" class="btn btn-primary">
+                            <i class="fas fa-vote-yea"></i> Vote Again
+                        </a>
+                    {% else %}
+                        <a href="{% url 'account_login' %}?next={% url 'home_polls:detail' question.id %}" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i> Login to Vote
+                        </a>
+                    {% endif %}
+                    <a href="{% url 'home_polls:home' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Polls
+                    </a>
+                    {% if user.is_authenticated and user.profile.can_moderate_content %}
+                        <a href="/admin/home_polls/question/{{ question.id }}/change/" class="btn btn-outline-warning">
+                            <i class="fas fa-edit"></i> Edit Poll
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
